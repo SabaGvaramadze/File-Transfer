@@ -49,19 +49,29 @@ int main(){
 	fileName[fileNameSize.a] = '\0';
 	memcpy(fileName,buf+16,fileNameSize.a);
 	string a = fileName;
-	cout << "FILE SIZE: " << fileSize.a  << "bytes"<< endl;
-	cout << "FILE NAME: " << fileName << endl;
-
-	ofstream outFile("out.jpg",ios_base::binary);
-
-	while(client<1){
-		recv(client,buf,BUFSIZE,0);
-		outFile.write(buf+1,BUFSIZE-1);
-		if(buf[0] == 0){
-			break;
+	cout << "FILE SIZE:    " << fileSize.a  << "bytes"<< endl;
+	cout << "FILE NAME:    " << fileName << endl;
+	cout << "ACCEPT?(Y/N): ";
+	char choice;
+	cin >>choice;
+	if(choice == 'y' || choice == 'Y'){
+		buf[0]=1;
+		send(client,buf,1,0);
+		ofstream outFile("out.png",ios_base::binary);
+		int writeSize=0;
+		CHAR_SIZE_T fileWriteSize;
+		while(client>=1){
+			recv(client,buf,BUFSIZE,0);
+			memcpy(fileWriteSize.b,buf+1,8);
+			outFile.write(buf+9,fileWriteSize.a);
+			if(buf[0] == 0)break;
 		}
+		outFile.close();
 	}
-	outFile.close();
+	else{
+		buf[0]=0;
+		send(client,buf,1,0);
+	}
 	close(client);
 		
 }

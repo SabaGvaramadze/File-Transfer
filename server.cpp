@@ -20,7 +20,8 @@ int main(int argc,char **argv){
 	int client,server;
 	const int PORT = 42069;
 	bool exit;
-	int BUFSIZE = 1024;
+	const int MAXREADSIZE = 1015;
+	const int BUFSIZE = MAXREADSIZE + 9;
 	char buf[BUFSIZE];
 
 	struct sockaddr_in server_addr;
@@ -69,13 +70,23 @@ int main(int argc,char **argv){
 	memcpy(buf+16,argv[1],fileNameSize.a);
 	
 	send(server,buf,BUFSIZE,0);
-
+	
+	recv(server,buf,1,0);
+	if(buf[0] == 1){
+	
+	CHAR_SIZE_T readSize;
+	readSize.a = MAXREADSIZE;
+	buf[0]=1;
 	while(server >=0){
-		cout << "hello";
-		readFile.read(buf+1,BUFSIZE-1);
-		if(readFile.tellg() == fileSize.a)buf[0] = 0;
-		else buf[0] = 1;
+		cout << min((int)(fileSize.a-readFile.tellg()),BUFSIZE) << endl;
+		readSize.a = min((size_t)MAXREADSIZE,fileSize.a-readFile.tellg());
+		memcpy(buf+1,readSize.b,8);
+		readFile.read(buf+9,readSize.a);
+		if(readSize.a != MAXREADSIZE){
+			buf[0] = 0;
+		}
 		send(server,buf,BUFSIZE,0);
+	}
 	}
 	readFile.close();
 	close(server);
